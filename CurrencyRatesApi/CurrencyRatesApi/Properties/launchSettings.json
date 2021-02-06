@@ -12,7 +12,7 @@
     "IIS Express": {
       "commandName": "IISExpress",
       "launchBrowser": true,
-      "launchUrl": "currencyrate",
+      "launchUrl": "rate",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
@@ -20,7 +20,7 @@
     "CurrencyRatesApi": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "currencyrate",
+      "launchUrl": "rate",
       "applicationUrl": "https://localhost:5001;http://localhost:5000",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"

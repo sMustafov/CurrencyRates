@@ -1,40 +1,49 @@
-﻿using System;
+﻿
 using System.Collections.Generic;
-using System.Linq;
 using System.Xml;
-using System.Threading.Tasks;
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using System.Xml.Linq;
+using Microsoft.AspNetCore.Http;
+
+using CurrencyRatesApi.Entities.Models;
 
 namespace CurrencyRatesApi.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("/")]
     public class CurrencyRateController : ControllerBase
     {
-        const string URLString = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml";
+        private const string URLString = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml";
 
         private readonly ILogger<CurrencyRateController> logger;
-        private readonly List<CurrencyRate> currencyRateList;
+        private readonly IList<CurrencyRate> currencyRateList;
 
+        private XmlDocument XmlDocument { get; set; }
+        private CurrencyRate CurrencyRate { get; set; }
 
         public CurrencyRateController(ILogger<CurrencyRateController> logger)
         {
             this.logger = logger;
             this.currencyRateList = new List<CurrencyRate>();
+            this.XmlDocument = new XmlDocument();
         }
 
-        public CurrencyRate CurrencyRate { get; private set; }
+        // http://localhost:port/rate?currencypair=GBPUSD
+        [HttpGet("rate")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
 
-        [HttpGet]
-        public IEnumerable<CurrencyRate> Get()
+        public ActionResult<IEnumerable<CurrencyRate>> Get([FromQuery] string currencypair)
         {
+            if (currencypair == null)
+            {
+                return this.BadRequest(400);
+            }
 
-            XmlDocument myXmlDocument = new XmlDocument();
-            myXmlDocument.Load(URLString);
+            this.XmlDocument.Load(URLString);
 
-            foreach (XmlNode nodes in myXmlDocument.DocumentElement.ChildNodes)
+            foreach (XmlNode nodes in this.XmlDocument.DocumentElement.ChildNodes)
             {
                 foreach (XmlNode node in nodes)
                 {
@@ -54,7 +63,7 @@ namespace CurrencyRatesApi.Controllers
                 }
             }
 
-            return this.currencyRateList;
+            return this.Ok(this.currencyRateList);
         }
     }
 }

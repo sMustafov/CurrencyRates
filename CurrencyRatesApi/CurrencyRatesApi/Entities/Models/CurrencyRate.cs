@@ -1,4 +1,5 @@
-namespace CurrencyRatesApi
+﻿
+namespace CurrencyRatesApi.Entities.Models
 {
     public class CurrencyRate
     {
