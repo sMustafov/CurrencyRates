@@ -1,12 +1,11 @@
-﻿
-using System.Collections.Generic;
-using System.Xml;
+﻿using System.Xml;
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Http;
 
 using CurrencyRatesApi.Entities.Models;
+using CurrencyRatesApi.Interfaces;
 
 namespace CurrencyRatesApi.Controllers
 {
@@ -14,36 +13,49 @@ namespace CurrencyRatesApi.Controllers
     [Route("/")]
     public class CurrencyRateController : ControllerBase
     {
-        private const string URLString = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml";
-
         private readonly ILogger<CurrencyRateController> logger;
-        private readonly IList<CurrencyRate> currencyRateList;
+        private readonly ICurrencyRateService currencyRateService;
+        
+        private XmlDocument xmlDocument;
 
-        private XmlDocument XmlDocument { get; set; }
         private CurrencyRate CurrencyRate { get; set; }
 
-        public CurrencyRateController(ILogger<CurrencyRateController> logger)
+        public CurrencyRateController(ILogger<CurrencyRateController> logger, ICurrencyRateService currencyRateService)
         {
             this.logger = logger;
-            this.currencyRateList = new List<CurrencyRate>();
-            this.XmlDocument = new XmlDocument();
+            this.currencyRateService = currencyRateService;
         }
 
         // http://localhost:port/rate?currencypair=GBPUSD
         [HttpGet("rate")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-
-        public ActionResult<IEnumerable<CurrencyRate>> Get([FromQuery] string currencypair)
+        public ActionResult<CurrencyRate> Get([FromQuery] string currencypair)
         {
             if (currencypair == null)
             {
                 return this.BadRequest(400);
             }
 
-            this.XmlDocument.Load(URLString);
+            if (currencypair.Length != 6)
+            {
+                return this.BadRequest(400);
+            }
 
-            foreach (XmlNode nodes in this.XmlDocument.DocumentElement.ChildNodes)
+            this.xmlDocument = this.currencyRateService.LoadXml();
+
+            var baseCurrency = currencypair.Substring(0, 3);
+            var quoteCurrency = currencypair.Substring(currencypair.Length - 3);
+
+            CurrencyRate = new CurrencyRate
+            {
+                BaseCurrency = "",
+                BaseCurrencyRate = "",
+                QuoteCurrency = "",
+                QuoteCurrencyRate = ""
+            };
+
+            foreach (XmlNode nodes in this.xmlDocument.DocumentElement.ChildNodes)
             {
                 foreach (XmlNode node in nodes)
                 {
@@ -51,19 +63,24 @@ namespace CurrencyRatesApi.Controllers
                     {
                         foreach (XmlNode childNode in node.ChildNodes)
                         {
-                            CurrencyRate = new CurrencyRate
+                            if (childNode.Attributes[0].Value == baseCurrency)
                             {
-                                Currency = childNode.Attributes[0].Value,
-                                Rate = childNode.Attributes[1].Value
-                            };
+                                CurrencyRate.BaseCurrency = childNode.Attributes[0].Value;
+                                CurrencyRate.BaseCurrencyRate = childNode.Attributes[1].Value;
+                            }
 
-                            this.currencyRateList.Add(CurrencyRate);
+                            if (childNode.Attributes[0].Value == quoteCurrency)
+                            {
+                                CurrencyRate.QuoteCurrency = childNode.Attributes[0].Value;
+                                CurrencyRate.QuoteCurrencyRate = childNode.Attributes[1].Value;
+
+                            }                            
                         }
                     }
                 }
             }
 
-            return this.Ok(this.currencyRateList);
+            return this.Ok(CurrencyRate);
         }
     }
 }

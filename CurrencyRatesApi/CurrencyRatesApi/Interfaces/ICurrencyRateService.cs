@@ -1,7 +1,9 @@
-﻿namespace CurrencyRatesApi.Interfaces
+﻿using System.Xml;
+
+namespace CurrencyRatesApi.Interfaces
 {
     public interface ICurrencyRateService
     {
-        // TODO
+        public XmlDocument LoadXml();
     }
 }
