@@ -14,7 +14,6 @@ namespace CurrencyRatesApi.Controllers
     {
         private readonly ILogger<CurrencyRateController> logger;
         private readonly ICurrencyRateService currencyRateService;
-
         public CurrencyRateController(ILogger<CurrencyRateController> logger, ICurrencyRateService currencyRateService)
         {
             this.logger = logger;

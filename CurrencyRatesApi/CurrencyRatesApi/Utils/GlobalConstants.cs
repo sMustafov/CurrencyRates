@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace CurrencyRatesApi.Utils
+﻿namespace CurrencyRatesApi.Utils
 {
     public static class GlobalConstants
     {
@@ -12,5 +7,10 @@ namespace CurrencyRatesApi.Utils
         public const string ERROR_CurrencyPairNotRightLength = "The currencypair must be 6 symbols!";
         public const string ERROR_BaseAndQuoteCurrenciesNotHaveNameOrRate = "The Base and Quote currencies should have names and rates!";
         public const string SUCCESS_CurrencyPairRateCalculated = "Successfully calculated currency pair rate!";
+
+        // XML
+        public const string XML_DOCUMENT_CACHE_KEY = "XmlDocument_Cache_Key";
+        public const string XML_DOCUMENT_URL = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml";
+
     }
 }

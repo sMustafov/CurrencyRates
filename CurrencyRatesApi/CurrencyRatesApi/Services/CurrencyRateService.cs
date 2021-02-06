@@ -2,30 +2,32 @@
 using System.Xml;
 using CurrencyRatesApi.Entities.Models;
 using CurrencyRatesApi.Interfaces;
+using CurrencyRatesApi.Utils;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace CurrencyRatesApi.Services
 {
     public class CurrencyRateService : ICurrencyRateService
     {
-        // TODO - extract to json
-        private const string XML_DOCUMENT_URL = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml";
+        private readonly IMemoryCache memoryCache;
 
-        private readonly XmlDocument XmlDocument;
+        private XmlDocument XmlDocument;
 
         private BaseCurrency BaseCurrency;
         private QuoteCurrency QuoteCurrency;
         private CurrencyPair CurrencyPair;
-        public CurrencyRateService()
+        
+        public CurrencyRateService(IMemoryCache memoryCache)
         {
-            // Creating new XML document object
             this.XmlDocument = new XmlDocument();
-            
-            // Loading XML document from ECB URL 
-            this.XmlDocument.Load(XML_DOCUMENT_URL);
+            this.memoryCache = memoryCache;
         }
 
         public CurrencyPair CalculateCurrencyPairRate(string currencyPair)
         {
+            // Add to in-memory cache or get it is already there
+            this.AddOrGetFromInMemoryCache();
+            
             // Extracting the info for given currencyPair
             this.ExtractCurrencyAndRateFromXml(currencyPair);
 
@@ -82,6 +84,22 @@ namespace CurrencyRatesApi.Services
                         }
                     }
                 }
+            }
+        }
+
+        private void AddOrGetFromInMemoryCache()
+        {
+            bool isExist = this.memoryCache.TryGetValue(GlobalConstants.XML_DOCUMENT_CACHE_KEY, out this.XmlDocument);
+            if (!isExist)
+            {
+                this.XmlDocument = new XmlDocument();
+
+                this.XmlDocument.Load(GlobalConstants.XML_DOCUMENT_URL);
+
+                var cacheEntryOptions = new MemoryCacheEntryOptions()
+                    .SetSlidingExpiration(TimeSpan.FromSeconds(30));
+
+                this.memoryCache.Set(GlobalConstants.XML_DOCUMENT_CACHE_KEY, this.XmlDocument, cacheEntryOptions);
             }
         }
     }
