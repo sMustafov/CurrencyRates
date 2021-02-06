@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 
 using CurrencyRatesApi.Entities.Models;
 using CurrencyRatesApi.Interfaces;
+using CurrencyRatesApi.Utils;
 
 namespace CurrencyRatesApi.Controllers
 {
@@ -28,15 +29,26 @@ namespace CurrencyRatesApi.Controllers
         {
             if (currencypair == null)
             {
+                logger.LogError(GlobalConstants.ERROR_CurrencyPairNotProvided);
                 return this.BadRequest(400);
             }
 
             if (currencypair.Length != 6)
             {
+                logger.LogError(GlobalConstants.ERROR_CurrencyPairNotRightLength);
                 return this.BadRequest(400);
             }
 
             var currencyPairCalculatedInfo = this.currencyRateService.CalculateCurrencyPairRate(currencypair);
+
+            if (currencyPairCalculatedInfo == null)
+            {
+                logger.LogError(GlobalConstants.ERROR_BaseAndQuoteCurrenciesNotHaveNameOrRate);
+                return this.BadRequest(400);
+            }
+
+            logger.LogInformation(GlobalConstants.SUCCESS_CurrencyPairRateCalculated);
+
 
             return this.Ok(currencyPairCalculatedInfo);
         }

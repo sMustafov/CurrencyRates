@@ -33,6 +33,11 @@ namespace CurrencyRatesApi.Services
             // E.g. currencyPair = GBPUSD => EURUSD / EURGBP
             var currencyPairRate = Math.Round((QuoteCurrency.Rate / BaseCurrency.Rate), 2, MidpointRounding.AwayFromZero);
 
+            if (BaseCurrency.Name == null || QuoteCurrency.Name == null)
+            {
+                return null;
+            }
+
             // Creating currency pair
             CurrencyPair = new CurrencyPair
             {
