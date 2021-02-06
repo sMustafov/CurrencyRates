@@ -1,9 +1,9 @@
-﻿using System.Xml;
+﻿using CurrencyRatesApi.Entities.Models;
 
 namespace CurrencyRatesApi.Interfaces
 {
     public interface ICurrencyRateService
     {
-        public XmlDocument LoadXml();
+        public CurrencyPair CalculateCurrencyPairRate(string currencyPair);
     }
 }
