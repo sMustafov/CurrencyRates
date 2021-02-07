@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Http;
 
 using CurrencyRatesApi.Entities.Models;
 using CurrencyRatesApi.Interfaces;
-using CurrencyRatesApi.Utils;
+using CurrencyRatesApi.Common;
 
 namespace CurrencyRatesApi.Controllers
 {

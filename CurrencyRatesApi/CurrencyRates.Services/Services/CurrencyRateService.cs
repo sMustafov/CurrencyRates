@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Xml;
+using CurrencyRatesApi.Common;
 using CurrencyRatesApi.Entities.Models;
 using CurrencyRatesApi.Interfaces;
-using CurrencyRatesApi.Utils;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace CurrencyRatesApi.Services

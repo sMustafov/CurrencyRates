@@ -1,4 +1,4 @@
-﻿namespace CurrencyRatesApi.Utils
+﻿namespace CurrencyRatesApi.Common
 {
     public static class GlobalConstants
     {
