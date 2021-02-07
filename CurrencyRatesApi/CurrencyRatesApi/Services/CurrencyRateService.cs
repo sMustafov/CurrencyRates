@@ -98,7 +98,6 @@ namespace CurrencyRatesApi.Services
 
                 // TODO - Make it one day, for testing purposes - 20 seconds
                 var cacheEntryOptions = new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromSeconds(20));
-                  //  .SetSlidingExpiration(TimeSpan.FromSeconds(30));
 
                 this.memoryCache.Set(GlobalConstants.XML_DOCUMENT_CACHE_KEY, this.XmlDocument, cacheEntryOptions);
             }
