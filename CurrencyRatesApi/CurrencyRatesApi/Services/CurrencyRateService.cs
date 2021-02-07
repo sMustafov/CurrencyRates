@@ -96,8 +96,9 @@ namespace CurrencyRatesApi.Services
 
                 this.XmlDocument.Load(GlobalConstants.XML_DOCUMENT_URL);
 
-                var cacheEntryOptions = new MemoryCacheEntryOptions()
-                    .SetSlidingExpiration(TimeSpan.FromSeconds(30));
+                // TODO - Make it one day, for testing purposes - 20 seconds
+                var cacheEntryOptions = new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromSeconds(20));
+                  //  .SetSlidingExpiration(TimeSpan.FromSeconds(30));
 
                 this.memoryCache.Set(GlobalConstants.XML_DOCUMENT_CACHE_KEY, this.XmlDocument, cacheEntryOptions);
             }

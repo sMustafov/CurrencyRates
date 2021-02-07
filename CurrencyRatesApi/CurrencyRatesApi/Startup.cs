@@ -1,10 +1,13 @@
-using CurrencyRatesApi.Interfaces;
-using CurrencyRatesApi.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+
+using CurrencyRatesApi.Interfaces;
+using CurrencyRatesApi.Services;
+using CurrencyRatesApi.Services.MemoryCacheManager;
 
 namespace CurrencyRatesApi
 {
@@ -25,6 +28,9 @@ namespace CurrencyRatesApi
             services.AddMemoryCache();
 
             services.AddTransient<ICurrencyRateService, CurrencyRateService>();
+
+            services.AddSingleton<IMemoryCache, MemoryCacheManager>();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
