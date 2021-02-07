@@ -1,10 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Microsoft.AspNetCore.Http;
 
+using CurrencyRatesApi.Common;
 using CurrencyRatesApi.Entities.Models;
 using CurrencyRatesApi.Interfaces;
-using CurrencyRatesApi.Common;
 
 namespace CurrencyRatesApi.Controllers
 {
@@ -21,16 +21,16 @@ namespace CurrencyRatesApi.Controllers
         }
 
         // http://localhost:port/rate?currencypair=GBPUSD
-        [HttpGet("")]
+        [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public ActionResult Get()
         {
+            logger.LogInformation(GlobalConstants.SUCCESS_StartedApplication);
 
-            return this.Ok("Get rate of convert Currencies by requesting the following URL: /rate?currencypair=GBPUSD. (GBPUSD is example currency pair)!");
+            return this.Ok("Get rate of converted currencies by requesting the following URL: /rate?currencypair=GBPUSD. (GBPUSD is example currency pair)!");
         }
 
-        // http://localhost:port/rate?currencypair=GBPUSD
         [HttpGet("rate")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -38,14 +38,7 @@ namespace CurrencyRatesApi.Controllers
         {
             var currencyPairCalculatedInfo = this.currencyRateService.CalculateCurrencyPairRate(currencypair);
 
-            if (currencyPairCalculatedInfo == null)
-            {
-                logger.LogError(GlobalConstants.ERROR_BaseAndQuoteCurrenciesNotHaveNameOrRate);
-                return this.BadRequest(400);
-            }
-
             logger.LogInformation(GlobalConstants.SUCCESS_CurrencyPairRateCalculated);
-
 
             return this.Ok(currencyPairCalculatedInfo);
         }

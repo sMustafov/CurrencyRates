@@ -1,10 +1,13 @@
-﻿using CurrencyRates.Services.Utils.Exceptions;
+﻿using System;
+using System.Xml;
+
+using Microsoft.Extensions.Caching.Memory;
+
 using CurrencyRatesApi.Common;
 using CurrencyRatesApi.Entities.Models;
 using CurrencyRatesApi.Interfaces;
-using Microsoft.Extensions.Caching.Memory;
-using System;
-using System.Xml;
+using CurrencyRates.Services.Utils.Exceptions;
+
 
 namespace CurrencyRatesApi.Services
 {
@@ -28,12 +31,12 @@ namespace CurrencyRatesApi.Services
         {
             if (currencyPair == null)
             {
-                throw new CustomArgumentException(GlobalConstants.ERROR_CurrencyPairNotProvided);
+                throw new CustomInvalidOperationException(GlobalConstants.ERROR_CurrencyPairNotProvided);
             }
 
             if (currencyPair.Length != 6)
             {
-                throw new CustomArgumentException(GlobalConstants.ERROR_CurrencyPairNotRightLength);
+                throw new CustomInvalidOperationException(GlobalConstants.ERROR_CurrencyPairNotRightLength);
             }
 
             // Add to in-memory cache or get it is already there
@@ -42,16 +45,14 @@ namespace CurrencyRatesApi.Services
             // Extracting the info for given currencyPair
             this.ExtractCurrencyAndRateFromXml(currencyPair);
 
+            if (BaseCurrency.Name == null || QuoteCurrency.Name == null)
+            {
+                throw new CustomArgumentException(GlobalConstants.ERROR_BaseAndQuoteCurrenciesNotHaveNameOrRate);
+            }
+
             // Calculating currency pair rate
             // E.g. currencyPair = GBPUSD => EURUSD / EURGBP
             var currencyPairRate = Math.Round((QuoteCurrency.Rate / BaseCurrency.Rate), 2, MidpointRounding.AwayFromZero);
-
-            if (BaseCurrency.Name == null || QuoteCurrency.Name == null)
-            {
-                throw new CustomArgumentException("Невалидно!");
-
-                //return null;
-            }
 
             // Creating currency pair
             CurrencyPair = new CurrencyPair

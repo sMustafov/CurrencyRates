@@ -8,7 +8,7 @@ using Microsoft.Extensions.Hosting;
 using CurrencyRatesApi.Interfaces;
 using CurrencyRatesApi.Services;
 using CurrencyRatesApi.Middlewares.Extensions;
-using CurrencyRatesApi.Services.MemoryCacheManager;
+using CurrencyRatesApi.Services.Utils.MemoryCacheManager;
 
 namespace CurrencyRatesApi
 {

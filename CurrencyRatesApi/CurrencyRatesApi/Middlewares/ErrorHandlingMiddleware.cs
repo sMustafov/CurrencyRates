@@ -37,13 +37,13 @@ namespace CurrencyRatesApi.Middlewares
         {
             var code = StatusCodes.Status500InternalServerError;
 
-            if (e is CustomArgumentException)
-            {
-                code = StatusCodes.Status404NotFound;
-            }
-            else if (e is CustomInvalidOperationException)
+            if (e is CustomInvalidOperationException)
             {
                 code = StatusCodes.Status400BadRequest;
+            }
+            else if (e is CustomArgumentException)
+            {
+                code = StatusCodes.Status404NotFound;
             }
 
             var resultMessage = JsonConvert.SerializeObject(new ErrorMessage { Message = e.Message, StatusCode = code });
