@@ -4,4 +4,14 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="5.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CurrencyRates.Common\CurrencyRates.Common.csproj" />
+    <ProjectReference Include="..\CurrencyRates.Entities\CurrencyRates.Entities.csproj" />
+  </ItemGroup>
+
 </Project>

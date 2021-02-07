@@ -21,23 +21,21 @@ namespace CurrencyRatesApi.Controllers
         }
 
         // http://localhost:port/rate?currencypair=GBPUSD
+        [HttpGet("")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public ActionResult Get()
+        {
+
+            return this.Ok("Get rate of convert Currencies by requesting the following URL: /rate?currencypair=GBPUSD. (GBPUSD is example currency pair)!");
+        }
+
+        // http://localhost:port/rate?currencypair=GBPUSD
         [HttpGet("rate")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public ActionResult<CurrencyPair> Get([FromQuery] string currencypair)
         {
-            if (currencypair == null)
-            {
-                logger.LogError(GlobalConstants.ERROR_CurrencyPairNotProvided);
-                return this.BadRequest(400);
-            }
-
-            if (currencypair.Length != 6)
-            {
-                logger.LogError(GlobalConstants.ERROR_CurrencyPairNotRightLength);
-                return this.BadRequest(400);
-            }
-
             var currencyPairCalculatedInfo = this.currencyRateService.CalculateCurrencyPairRate(currencypair);
 
             if (currencyPairCalculatedInfo == null)

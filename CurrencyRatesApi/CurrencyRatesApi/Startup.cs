@@ -7,6 +7,7 @@ using Microsoft.Extensions.Hosting;
 
 using CurrencyRatesApi.Interfaces;
 using CurrencyRatesApi.Services;
+using CurrencyRatesApi.Middlewares.Extensions;
 using CurrencyRatesApi.Services.MemoryCacheManager;
 
 namespace CurrencyRatesApi
@@ -40,6 +41,8 @@ namespace CurrencyRatesApi
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.UseErrorHandlingMiddleware();
 
             app.UseHttpsRedirection();
 

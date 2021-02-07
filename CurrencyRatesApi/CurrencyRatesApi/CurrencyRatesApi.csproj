@@ -4,5 +4,15 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CurrencyRates.Common\CurrencyRates.Common.csproj" />
+    <ProjectReference Include="..\CurrencyRates.Entities\CurrencyRates.Entities.csproj" />
+    <ProjectReference Include="..\CurrencyRates.Services\CurrencyRates.Services.csproj" />
+  </ItemGroup>
+
 
 </Project>

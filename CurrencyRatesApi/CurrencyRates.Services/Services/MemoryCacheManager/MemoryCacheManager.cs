@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
 
-namespace CurrencyRatesApi.Services.Utils.MemoryCacheManager
+namespace CurrencyRatesApi.Services.MemoryCacheManager
 {
     public class MemoryCacheManager : IMemoryCache
     {

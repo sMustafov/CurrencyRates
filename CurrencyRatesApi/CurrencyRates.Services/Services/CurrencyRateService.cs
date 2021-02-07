@@ -1,9 +1,10 @@
-﻿using System;
-using System.Xml;
+﻿using CurrencyRates.Services.Utils.Exceptions;
 using CurrencyRatesApi.Common;
 using CurrencyRatesApi.Entities.Models;
 using CurrencyRatesApi.Interfaces;
 using Microsoft.Extensions.Caching.Memory;
+using System;
+using System.Xml;
 
 namespace CurrencyRatesApi.Services
 {
@@ -16,7 +17,7 @@ namespace CurrencyRatesApi.Services
         private BaseCurrency BaseCurrency;
         private QuoteCurrency QuoteCurrency;
         private CurrencyPair CurrencyPair;
-        
+
         public CurrencyRateService(IMemoryCache memoryCache)
         {
             this.XmlDocument = new XmlDocument();
@@ -25,9 +26,19 @@ namespace CurrencyRatesApi.Services
 
         public CurrencyPair CalculateCurrencyPairRate(string currencyPair)
         {
+            if (currencyPair == null)
+            {
+                throw new CustomArgumentException(GlobalConstants.ERROR_CurrencyPairNotProvided);
+            }
+
+            if (currencyPair.Length != 6)
+            {
+                throw new CustomArgumentException(GlobalConstants.ERROR_CurrencyPairNotRightLength);
+            }
+
             // Add to in-memory cache or get it is already there
             this.AddOrGetFromInMemoryCache();
-            
+
             // Extracting the info for given currencyPair
             this.ExtractCurrencyAndRateFromXml(currencyPair);
 
@@ -37,7 +48,9 @@ namespace CurrencyRatesApi.Services
 
             if (BaseCurrency.Name == null || QuoteCurrency.Name == null)
             {
-                return null;
+                throw new CustomArgumentException("Невалидно!");
+
+                //return null;
             }
 
             // Creating currency pair
