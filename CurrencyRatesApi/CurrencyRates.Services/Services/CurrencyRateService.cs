@@ -1,30 +1,38 @@
 ﻿using System;
-using System.Xml;
+using System.IO;
+using System.Net;
+using System.Text;
+using System.Xml.Serialization;
 
 using Microsoft.Extensions.Caching.Memory;
 
 using CurrencyRatesApi.Common;
 using CurrencyRatesApi.Entities.Models;
+using CurrencyRates.Entities.XmlModel;
 using CurrencyRatesApi.Interfaces;
 using CurrencyRates.Services.Utils.Exceptions;
-
 
 namespace CurrencyRatesApi.Services
 {
     public class CurrencyRateService : ICurrencyRateService
     {
-        private readonly IMemoryCache memoryCache;
+        private readonly IMemoryCache MemoryCache;
+        private readonly WebClient WebClient;
+        private readonly XmlSerializer XmlSerializer;
 
-        private XmlDocument XmlDocument;
+        private string XmlData;
 
+        private EcbEnvelope EcbEnvelope;
         private BaseCurrency BaseCurrency;
         private QuoteCurrency QuoteCurrency;
         private CurrencyPair CurrencyPair;
 
         public CurrencyRateService(IMemoryCache memoryCache)
         {
-            this.XmlDocument = new XmlDocument();
-            this.memoryCache = memoryCache;
+            this.XmlData = null;
+            this.MemoryCache = memoryCache;
+            this.WebClient = new WebClient();
+            this.XmlSerializer = new XmlSerializer(typeof(EcbEnvelope));
         }
 
         public CurrencyPair CalculateCurrencyPairRate(string currencyPair)
@@ -40,7 +48,7 @@ namespace CurrencyRatesApi.Services
             }
 
             // Add to in-memory cache or get it is already there
-            this.AddOrGetFromInMemoryCache();
+            this.AddOrGetInMemoryCache();
 
             // Extracting the info for given currencyPair
             this.ExtractCurrencyAndRateFromXml(currencyPair);
@@ -66,54 +74,52 @@ namespace CurrencyRatesApi.Services
 
         private void ExtractCurrencyAndRateFromXml(string currencyPair)
         {
-            var baseCurrency = currencyPair.Substring(0, 3);
-            var quoteCurrency = currencyPair.Substring(currencyPair.Length - 3);
+            var givenBaseCurrency = currencyPair.Substring(0, 3);
+            var givenQuoteCurrency = currencyPair.Substring(currencyPair.Length - 3);
 
-            foreach (XmlNode nodes in this.XmlDocument.DocumentElement.ChildNodes)
+            this.DeserializeString();
+
+            this.CreateBaseCurrency(givenBaseCurrency);
+            this.CreateQuoteCurrency(givenQuoteCurrency);
+        }
+
+        private void DeserializeString()
+        {
+            using (var stringReader = new StringReader(this.XmlData))
             {
-                foreach (XmlNode node in nodes)
-                {
-                    if (node.Name == "Cube")
-                    {
-                        foreach (XmlNode childNode in node.ChildNodes)
-                        {
-                            if (childNode.Attributes[0].Value == baseCurrency)
-                            {
-                                BaseCurrency = new BaseCurrency
-                                {
-                                    Name = childNode.Attributes[0].Value,
-                                    Rate = decimal.Parse(childNode.Attributes[1].Value)
-                                };
-                            }
-
-                            if (childNode.Attributes[0].Value == quoteCurrency)
-                            {
-                                QuoteCurrency = new QuoteCurrency
-                                {
-                                    Name = childNode.Attributes[0].Value,
-                                    Rate = decimal.Parse(childNode.Attributes[1].Value)
-                                };
-
-                            }
-                        }
-                    }
-                }
+                this.EcbEnvelope = this.XmlSerializer.Deserialize(stringReader) as EcbEnvelope;
             }
         }
 
-        private void AddOrGetFromInMemoryCache()
+        private void CreateBaseCurrency(string givenBaseCurrency)
         {
-            bool isExist = this.memoryCache.TryGetValue(GlobalConstants.XML_DOCUMENT_CACHE_KEY, out this.XmlDocument);
+            var baseCurrencyInfo = this.EcbEnvelope.CubeRootEl[0].CubeItems.Find(c => c.Currency == givenBaseCurrency);
+            this.BaseCurrency = new BaseCurrency
+            {
+                Name = baseCurrencyInfo.Currency,
+                Rate = baseCurrencyInfo.Rate
+            };
+        }
+        private void CreateQuoteCurrency(string givenQuoteCurrency)
+        {
+            var quoteCurrencyInfo = this.EcbEnvelope.CubeRootEl[0].CubeItems.Find(c => c.Currency == givenQuoteCurrency);
+            this.QuoteCurrency = new QuoteCurrency
+            {
+                Name = quoteCurrencyInfo.Currency,
+                Rate = quoteCurrencyInfo.Rate
+            };
+        }
+        private void AddOrGetInMemoryCache()
+        {
+            bool isExist = this.MemoryCache.TryGetValue(GlobalConstants.XML_DOCUMENT_CACHE_KEY, out this.XmlData);
             if (!isExist)
             {
-                this.XmlDocument = new XmlDocument();
-
-                this.XmlDocument.Load(GlobalConstants.XML_DOCUMENT_URL);
+                this.XmlData = Encoding.Default.GetString(WebClient.DownloadData(GlobalConstants.XML_DOCUMENT_URL));
 
                 // TODO - Make it one day, for testing purposes - 20 seconds
                 var cacheEntryOptions = new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromSeconds(20));
 
-                this.memoryCache.Set(GlobalConstants.XML_DOCUMENT_CACHE_KEY, this.XmlDocument, cacheEntryOptions);
+                this.MemoryCache.Set(GlobalConstants.XML_DOCUMENT_CACHE_KEY, this.XmlData, cacheEntryOptions);
             }
         }
     }
