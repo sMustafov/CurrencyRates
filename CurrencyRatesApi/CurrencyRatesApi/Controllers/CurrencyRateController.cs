@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using CurrencyRatesApi.Common;
 using CurrencyRatesApi.Entities.Models;
 using CurrencyRatesApi.Interfaces;
+using Microsoft.AspNetCore.Http;
 
 namespace CurrencyRatesApi.Controllers
 {
@@ -40,6 +41,8 @@ namespace CurrencyRatesApi.Controllers
         /// </summary>
         /// <returns>Message to say what to do to see currency rate</returns>
         [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public ActionResult Get()
         {
             logger.LogInformation(GlobalConstants.SUCCESS_StartedApplication);
@@ -53,6 +56,10 @@ namespace CurrencyRatesApi.Controllers
         /// <param name="currencypair">The currency pair</param>
         /// <returns>Currency pair name and rate</returns>
         [HttpGet("rate")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public ActionResult<CurrencyPair> Get([FromQuery] string currencypair)
         {
             var currencyPairCalculatedInfo = this.currencyRateService.CalculateCurrencyPairRate(currencypair);

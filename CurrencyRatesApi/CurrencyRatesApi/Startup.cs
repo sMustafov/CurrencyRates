@@ -28,9 +28,11 @@ namespace CurrencyRatesApi
 
             services.AddMemoryCache();
 
+            services.AddSwaggerGen();
+
             services.AddTransient<ICurrencyRateService, CurrencyRateService>();
 
-            services.AddSingleton<IMemoryCache, MemoryCacheManager>();
+            services.AddTransient<IMemoryCache, MemoryCacheManager>();
 
         }
 
@@ -45,6 +47,13 @@ namespace CurrencyRatesApi
             app.UseErrorHandlingMiddleware();
 
             app.UseHttpsRedirection();
+
+            app.UseSwagger();
+
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+            });
 
             app.UseRouting();
 
