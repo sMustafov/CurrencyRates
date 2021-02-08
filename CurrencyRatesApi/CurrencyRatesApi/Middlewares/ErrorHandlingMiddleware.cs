@@ -11,14 +11,31 @@ using CurrencyRates.Services.Utils.Exceptions;
 
 namespace CurrencyRatesApi.Middlewares
 {
+    /// <summary>
+    /// Error handling middleware class
+    /// </summary>
     public class ErrorHandlingMiddleware
     {
+        /// <summary>
+        /// Request delegate
+        /// </summary>
         private readonly RequestDelegate next;
 
+        /// <summary>
+        /// Inializes the new class
+        /// </summary>
+        /// <param name="next">The request delegate</param>
         public ErrorHandlingMiddleware(RequestDelegate next)
         {
             this.next = next;
         }
+
+        /// <summary>
+        /// Invokes the Middleware
+        /// </summary>
+        /// <param name="context">The HTTP context</param>
+        /// <param name="logger">The logger</param>
+        /// <returns></returns>
         public async Task Invoke(HttpContext context, ILogger<ErrorHandlingMiddleware> logger)
         {
             try
@@ -33,6 +50,12 @@ namespace CurrencyRatesApi.Middlewares
             }
         }
 
+        /// <summary>
+        /// Handling exeption 
+        /// </summary>
+        /// <param name="context">The HTTP context</param>
+        /// <param name="e">The exception</param>
+        /// <returns></returns>
         private static Task HandleExceptionAsync(HttpContext context, Exception e)
         {
             var code = StatusCodes.Status500InternalServerError;

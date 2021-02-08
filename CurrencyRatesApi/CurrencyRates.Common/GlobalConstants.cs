@@ -1,5 +1,8 @@
 ﻿namespace CurrencyRatesApi.Common
 {
+    /// <summary>
+    /// Global constants class
+    /// </summary>
     public static class GlobalConstants
     {
         /// <summary>

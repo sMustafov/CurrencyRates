@@ -14,19 +14,39 @@ using CurrencyRates.Services.Utils.Exceptions;
 
 namespace CurrencyRatesApi.Services
 {
+    /// <summary>
+    /// Implements the ICurrencyRateService
+    /// </summary>
     public class CurrencyRateService : ICurrencyRateService
     {
+        /// <summary> The <see cref="IMemoryCache"/>.</summary>
         private readonly IMemoryCache memoryCache;
+
+        /// <summary> The <see cref="WebClient"/>.</summary>
         private readonly WebClient webClient;
+
+        /// <summary> The <see cref="XmlSerializer"/>.</summary>
         private readonly XmlSerializer xmlSerializer;
 
+        /// <summary> The xml data as string</summary>
         private string xmlData;
 
+        /// <summary> The <see cref="EcbEnvelope"/>.</summary>
         private EcbEnvelope ecbEnvelope;
+
+        /// <summary> The <see cref="BaseCurrency"/>.</summary>
         private BaseCurrency baseCurrency;
+
+        /// <summary> The <see cref="QuoteCurrency"/>.</summary>
         private QuoteCurrency quoteCurrency;
+
+        /// <summary> The <see cref="CurrencyPair"/>.</summary>
         private CurrencyPair currencyPair;
 
+        /// <summary>
+        /// Initialize new instance of this class
+        /// </summary>
+        /// <param name="memoryCache">The <see cref="IMemoryCache"/>.</param>
         public CurrencyRateService(IMemoryCache memoryCache)
         {
             this.xmlData = null;
@@ -35,6 +55,11 @@ namespace CurrencyRatesApi.Services
             this.xmlSerializer = new XmlSerializer(typeof(EcbEnvelope));
         }
 
+        /// <summary>
+        /// Calculates the Currency pair rate
+        /// </summary>
+        /// <param name="currencyPairFromUrl">The currency pair which is give from the url.</param>
+        /// <returns></returns>
         public CurrencyPair CalculateCurrencyPairRate(string currencyPairFromUrl)
         {
             if (currencyPairFromUrl == null)
@@ -87,6 +112,11 @@ namespace CurrencyRatesApi.Services
             return this.currencyPair;
         }
 
+        /// <summary>
+        /// Extract currency and rate from xml
+        /// </summary>
+        /// <param name="givenBaseCurrency">The given base currency</param>
+        /// <param name="givenQuoteCurrency">The give quote currency</param>
         private void ExtractCurrencyAndRateFromXml(string givenBaseCurrency, string givenQuoteCurrency)
         {
             this.DeserializeString();
@@ -95,6 +125,9 @@ namespace CurrencyRatesApi.Services
             this.CreateQuoteCurrency(givenQuoteCurrency);
         }
 
+        /// <summary>
+        /// Deserializes the xml string data
+        /// </summary>
         private void DeserializeString()
         {
             using (var stringReader = new StringReader(this.xmlData))
@@ -103,6 +136,10 @@ namespace CurrencyRatesApi.Services
             }
         }
 
+        /// <summary>
+        /// Creates a Base Currency
+        /// </summary>
+        /// <param name="givenBaseCurrency">The given base currency</param>
         private void CreateBaseCurrency(string givenBaseCurrency)
         {
             var baseCurrencyInfo = this.ecbEnvelope.CubeRootEl[0].CubeItems.Find(c => c.Currency == givenBaseCurrency);
@@ -112,6 +149,10 @@ namespace CurrencyRatesApi.Services
             this.baseCurrency.Rate = this.CheckIfEuro(givenBaseCurrency) ? GlobalConstants.EURO_RATE : baseCurrencyInfo.Rate;
         }
         
+        /// <summary>
+        /// Creates a Quote Currency
+        /// </summary>
+        /// <param name="givenQuoteCurrency">The given quote currency</param>
         private void CreateQuoteCurrency(string givenQuoteCurrency)
         {
             var quoteCurrencyInfo = this.ecbEnvelope.CubeRootEl[0].CubeItems.Find(c => c.Currency == givenQuoteCurrency);
@@ -121,16 +162,30 @@ namespace CurrencyRatesApi.Services
             this.quoteCurrency.Rate = this.CheckIfEuro(givenQuoteCurrency) ? GlobalConstants.EURO_RATE : quoteCurrencyInfo.Rate;
         }
 
-        private bool CheckIfEuro(string currency)
+        /// <summary>
+        /// Check if the given currency name is EUR
+        /// </summary>
+        /// <param name="currencyName">Currency name</param>
+        /// <returns></returns>
+        private bool CheckIfEuro(string currencyName)
         {
-            return currency == GlobalConstants.EURO_NAME;
+            return currencyName == GlobalConstants.EURO_NAME;
         }
 
+        /// <summary>
+        /// Check if the currency names are the same
+        /// </summary>
+        /// <param name="baseCurrency">The base currency name</param>
+        /// <param name="quoteCurrency">The quote currency name</param>
+        /// <returns></returns>
         private bool CheckIfBaseAndQuoteCurrenciesSame(string baseCurrency, string quoteCurrency)
         {
             return baseCurrency == quoteCurrency;
         }
 
+        /// <summary>
+        /// Add to in-memory cache or get from there if it already exists
+        /// </summary>
         private void AddOrGetInMemoryCache()
         {
             bool isExist = this.memoryCache.TryGetValue(GlobalConstants.XML_DOCUMENT_CACHE_KEY, out this.xmlData);

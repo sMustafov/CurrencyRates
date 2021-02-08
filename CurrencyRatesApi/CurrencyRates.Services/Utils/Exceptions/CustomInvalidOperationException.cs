@@ -2,10 +2,17 @@
 
 namespace CurrencyRates.Services.Utils.Exceptions
 {
+    /// <summary>
+    /// Class for Custom Invalid Operation Exception
+    /// </summary>
     public class CustomInvalidOperationException : InvalidOperationException
     {
-        public CustomInvalidOperationException(string message)
-            : base(message)
+        /// <summary>
+        /// Initializes new instance of this class
+        /// </summary>
+        /// <param name="errorMessage">The error message</param>
+        public CustomInvalidOperationException(string errorMessage)
+            : base(errorMessage)
         {
         }
     }

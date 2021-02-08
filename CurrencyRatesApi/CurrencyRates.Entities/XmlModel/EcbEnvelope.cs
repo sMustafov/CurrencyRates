@@ -3,6 +3,9 @@ using System.Xml.Serialization;
 
 namespace CurrencyRates.Entities.XmlModel
 {
+    /// <summary>
+    /// ECB Enveloper class
+    /// </summary>
     [XmlRoot("Envelope", Namespace = GesmesNameSpace)]
     public class EcbEnvelope
     {
