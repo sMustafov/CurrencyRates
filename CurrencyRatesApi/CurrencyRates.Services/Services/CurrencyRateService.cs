@@ -75,39 +75,11 @@ namespace CurrencyRates.Services
             var givenBaseCurrency = currencyPairFromUrl.Substring(0, 3);
             var givenQuoteCurrency = currencyPairFromUrl.Substring(currencyPairFromUrl.Length - 3);
 
-            // If base and quote currencies are the same, we do not need to download the xml file, we can just return rate = 1
-            if (this.CheckIfBaseAndQuoteCurrenciesSame(givenBaseCurrency, givenQuoteCurrency))
-            {
-                this.currencyPair = new CurrencyPair
-                {
-                    Name = currencyPairFromUrl,
-                    Rate = 1
-                };
-
-                return currencyPair;
-            }
-
             // Add to in-memory cache or get it is already there
             this.AddOrGetInMemoryCache();
 
             // Extracting the info for given currencyPairFromUrl
             this.ExtractCurrencyAndRateFromXml(givenBaseCurrency, givenQuoteCurrency);
-
-            if (this.baseCurrency.Name == null || this.quoteCurrency.Name == null)
-            {
-                throw new CustomArgumentException(GlobalConstants.ERROR_BaseAndQuoteCurrenciesNotHaveNameOrRate);
-            }
-
-            // Calculating currency pair rate
-            // E.g. currencyPair = GBPUSD => EURUSD / EURGBP
-            var currencyPairRate = Math.Round((this.quoteCurrency.Rate / this.baseCurrency.Rate), 4, MidpointRounding.AwayFromZero);
-
-            // Creating currency pair
-            this.currencyPair = new CurrencyPair
-            {
-                Name = baseCurrency.Name + quoteCurrency.Name,
-                Rate = currencyPairRate
-            };
 
             return this.currencyPair;
         }
@@ -123,6 +95,17 @@ namespace CurrencyRates.Services
 
             this.CreateBaseCurrency(givenBaseCurrency);
             this.CreateQuoteCurrency(givenQuoteCurrency);
+
+            // Calculating currency pair rate
+            // E.g. currencyPair = GBPUSD => EURUSD / EURGBP
+            var currencyPairRate = Math.Round((this.quoteCurrency.Rate / this.baseCurrency.Rate), 4, MidpointRounding.AwayFromZero);
+
+            // Creating currency pair
+            this.currencyPair = new CurrencyPair
+            {
+                Name = baseCurrency.Name + quoteCurrency.Name,
+                Rate = currencyPairRate
+            };          
         }
 
         /// <summary>
@@ -144,6 +127,14 @@ namespace CurrencyRates.Services
         {
             var baseCurrencyInfo = this.ecbEnvelope.CubeRootEl[0].CubeItems.Find(c => c.Currency == givenBaseCurrency);
 
+            if (!this.CheckIfEuro(givenBaseCurrency))
+            {
+                if (baseCurrencyInfo == null)
+                {
+                    throw new CustomArgumentException(string.Format(GlobalConstants.ERROR_BaseCurrencyDoesNotExists, givenBaseCurrency));
+                }
+            }                
+
             this.baseCurrency = new BaseCurrency();
             this.baseCurrency.Name = this.CheckIfEuro(givenBaseCurrency) ? GlobalConstants.EURO_NAME : baseCurrencyInfo.Currency;
             this.baseCurrency.Rate = this.CheckIfEuro(givenBaseCurrency) ? GlobalConstants.EURO_RATE : baseCurrencyInfo.Rate;
@@ -156,6 +147,15 @@ namespace CurrencyRates.Services
         private void CreateQuoteCurrency(string givenQuoteCurrency)
         {
             var quoteCurrencyInfo = this.ecbEnvelope.CubeRootEl[0].CubeItems.Find(c => c.Currency == givenQuoteCurrency);
+
+            if (!this.CheckIfEuro(givenQuoteCurrency))
+            {
+                if (quoteCurrencyInfo == null)
+                {
+                    throw new CustomArgumentException(string.Format(GlobalConstants.ERROR_QuoteCurrencyDoesNotExists, givenQuoteCurrency));
+                }
+            }
+            
 
             this.quoteCurrency = new QuoteCurrency();
             this.quoteCurrency.Name = this.CheckIfEuro(givenQuoteCurrency) ? GlobalConstants.EURO_NAME : quoteCurrencyInfo.Currency;
@@ -170,17 +170,6 @@ namespace CurrencyRates.Services
         private bool CheckIfEuro(string currencyName)
         {
             return currencyName == GlobalConstants.EURO_NAME;
-        }
-
-        /// <summary>
-        /// Check if the currency names are the same
-        /// </summary>
-        /// <param name="baseCurrency">The base currency name</param>
-        /// <param name="quoteCurrency">The quote currency name</param>
-        /// <returns></returns>
-        private bool CheckIfBaseAndQuoteCurrenciesSame(string baseCurrency, string quoteCurrency)
-        {
-            return baseCurrency == quoteCurrency;
         }
 
         /// <summary>

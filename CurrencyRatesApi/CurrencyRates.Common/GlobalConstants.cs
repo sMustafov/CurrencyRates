@@ -10,7 +10,10 @@
         /// </summary>
         public const string ERROR_CurrencyPairNotProvided = "Not provided currencypair in url query!";
         public const string ERROR_CurrencyPairNotRightLength = "The currencypair must be 6 symbols!";
-        public const string ERROR_BaseAndQuoteCurrenciesNotHaveNameOrRate = "The Base and Quote currencies should have names and rates!";
+
+        public const string ERROR_BaseCurrencyDoesNotExists = "The Base Currency: {0} does not exists!";
+        public const string ERROR_QuoteCurrencyDoesNotExists = "The Quote Currency: {0} does not exists!";
+
         public const string SUCCESS_CurrencyPairRateCalculated = "Successfully calculated currency pair rate!";
         public const string SUCCESS_StartedApplication = "Successfully started the application!";
 
