@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
 using CurrencyRatesApi.Common;
@@ -20,10 +19,7 @@ namespace CurrencyRatesApi.Controllers
             this.currencyRateService = currencyRateService;
         }
 
-        // http://localhost:port/rate?currencypair=GBPUSD
         [HttpGet]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public ActionResult Get()
         {
             logger.LogInformation(GlobalConstants.SUCCESS_StartedApplication);
@@ -32,8 +28,6 @@ namespace CurrencyRatesApi.Controllers
         }
 
         [HttpGet("rate")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public ActionResult<CurrencyPair> Get([FromQuery] string currencypair)
         {
             var currencyPairCalculatedInfo = this.currencyRateService.CalculateCurrencyPairRate(currencypair);

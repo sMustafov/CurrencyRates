@@ -16,67 +16,79 @@ namespace CurrencyRatesApi.Services
 {
     public class CurrencyRateService : ICurrencyRateService
     {
-        private readonly IMemoryCache MemoryCache;
-        private readonly WebClient WebClient;
-        private readonly XmlSerializer XmlSerializer;
+        private readonly IMemoryCache memoryCache;
+        private readonly WebClient webClient;
+        private readonly XmlSerializer xmlSerializer;
 
-        private string XmlData;
+        private string xmlData;
 
-        private EcbEnvelope EcbEnvelope;
-        private BaseCurrency BaseCurrency;
-        private QuoteCurrency QuoteCurrency;
-        private CurrencyPair CurrencyPair;
+        private EcbEnvelope ecbEnvelope;
+        private BaseCurrency baseCurrency;
+        private QuoteCurrency quoteCurrency;
+        private CurrencyPair currencyPair;
 
         public CurrencyRateService(IMemoryCache memoryCache)
         {
-            this.XmlData = null;
-            this.MemoryCache = memoryCache;
-            this.WebClient = new WebClient();
-            this.XmlSerializer = new XmlSerializer(typeof(EcbEnvelope));
+            this.xmlData = null;
+            this.memoryCache = memoryCache;
+            this.webClient = new WebClient();
+            this.xmlSerializer = new XmlSerializer(typeof(EcbEnvelope));
         }
 
-        public CurrencyPair CalculateCurrencyPairRate(string currencyPair)
+        public CurrencyPair CalculateCurrencyPairRate(string currencyPairFromUrl)
         {
-            if (currencyPair == null)
+            if (currencyPairFromUrl == null)
             {
                 throw new CustomInvalidOperationException(GlobalConstants.ERROR_CurrencyPairNotProvided);
             }
 
-            if (currencyPair.Length != 6)
+            if (currencyPairFromUrl.Length != 6)
             {
                 throw new CustomInvalidOperationException(GlobalConstants.ERROR_CurrencyPairNotRightLength);
+            }
+
+            var givenBaseCurrency = currencyPairFromUrl.Substring(0, 3);
+            var givenQuoteCurrency = currencyPairFromUrl.Substring(currencyPairFromUrl.Length - 3);
+
+            // If base and quote currencies are the same, we do not need to download the xml file, we can just return rate = 1
+            if (this.CheckIfBaseAndQuoteCurrenciesSame(givenBaseCurrency, givenQuoteCurrency))
+            {
+                this.currencyPair = new CurrencyPair
+                {
+                    Name = currencyPairFromUrl,
+                    Rate = 1
+                };
+
+                return currencyPair;
             }
 
             // Add to in-memory cache or get it is already there
             this.AddOrGetInMemoryCache();
 
-            // Extracting the info for given currencyPair
-            this.ExtractCurrencyAndRateFromXml(currencyPair);
+            // Extracting the info for given currencyPairFromUrl
+            this.ExtractCurrencyAndRateFromXml(givenBaseCurrency, givenQuoteCurrency);
 
-            if (BaseCurrency.Name == null || QuoteCurrency.Name == null)
+            if (this.baseCurrency.Name == null || this.quoteCurrency.Name == null)
             {
                 throw new CustomArgumentException(GlobalConstants.ERROR_BaseAndQuoteCurrenciesNotHaveNameOrRate);
             }
 
             // Calculating currency pair rate
             // E.g. currencyPair = GBPUSD => EURUSD / EURGBP
-            var currencyPairRate = Math.Round((QuoteCurrency.Rate / BaseCurrency.Rate), 2, MidpointRounding.AwayFromZero);
+            var currencyPairRate = Math.Round((this.quoteCurrency.Rate / this.baseCurrency.Rate), 4, MidpointRounding.AwayFromZero);
 
             // Creating currency pair
-            CurrencyPair = new CurrencyPair
+            this.currencyPair = new CurrencyPair
             {
-                Name = BaseCurrency.Name + QuoteCurrency.Name,
+                Name = baseCurrency.Name + quoteCurrency.Name,
                 Rate = currencyPairRate
             };
 
-            return CurrencyPair;
+            return this.currencyPair;
         }
 
-        private void ExtractCurrencyAndRateFromXml(string currencyPair)
+        private void ExtractCurrencyAndRateFromXml(string givenBaseCurrency, string givenQuoteCurrency)
         {
-            var givenBaseCurrency = currencyPair.Substring(0, 3);
-            var givenQuoteCurrency = currencyPair.Substring(currencyPair.Length - 3);
-
             this.DeserializeString();
 
             this.CreateBaseCurrency(givenBaseCurrency);
@@ -85,41 +97,51 @@ namespace CurrencyRatesApi.Services
 
         private void DeserializeString()
         {
-            using (var stringReader = new StringReader(this.XmlData))
+            using (var stringReader = new StringReader(this.xmlData))
             {
-                this.EcbEnvelope = this.XmlSerializer.Deserialize(stringReader) as EcbEnvelope;
+                this.ecbEnvelope = this.xmlSerializer.Deserialize(stringReader) as EcbEnvelope;
             }
         }
 
         private void CreateBaseCurrency(string givenBaseCurrency)
         {
-            var baseCurrencyInfo = this.EcbEnvelope.CubeRootEl[0].CubeItems.Find(c => c.Currency == givenBaseCurrency);
-            this.BaseCurrency = new BaseCurrency
-            {
-                Name = baseCurrencyInfo.Currency,
-                Rate = baseCurrencyInfo.Rate
-            };
+            var baseCurrencyInfo = this.ecbEnvelope.CubeRootEl[0].CubeItems.Find(c => c.Currency == givenBaseCurrency);
+
+            this.baseCurrency = new BaseCurrency();
+            this.baseCurrency.Name = this.CheckIfEuro(givenBaseCurrency) ? GlobalConstants.EURO_NAME : baseCurrencyInfo.Currency;
+            this.baseCurrency.Rate = this.CheckIfEuro(givenBaseCurrency) ? GlobalConstants.EURO_RATE : baseCurrencyInfo.Rate;
         }
+        
         private void CreateQuoteCurrency(string givenQuoteCurrency)
         {
-            var quoteCurrencyInfo = this.EcbEnvelope.CubeRootEl[0].CubeItems.Find(c => c.Currency == givenQuoteCurrency);
-            this.QuoteCurrency = new QuoteCurrency
-            {
-                Name = quoteCurrencyInfo.Currency,
-                Rate = quoteCurrencyInfo.Rate
-            };
+            var quoteCurrencyInfo = this.ecbEnvelope.CubeRootEl[0].CubeItems.Find(c => c.Currency == givenQuoteCurrency);
+
+            this.quoteCurrency = new QuoteCurrency();
+            this.quoteCurrency.Name = this.CheckIfEuro(givenQuoteCurrency) ? GlobalConstants.EURO_NAME : quoteCurrencyInfo.Currency;
+            this.quoteCurrency.Rate = this.CheckIfEuro(givenQuoteCurrency) ? GlobalConstants.EURO_RATE : quoteCurrencyInfo.Rate;
         }
+
+        private bool CheckIfEuro(string currency)
+        {
+            return currency == GlobalConstants.EURO_NAME;
+        }
+
+        private bool CheckIfBaseAndQuoteCurrenciesSame(string baseCurrency, string quoteCurrency)
+        {
+            return baseCurrency == quoteCurrency;
+        }
+
         private void AddOrGetInMemoryCache()
         {
-            bool isExist = this.MemoryCache.TryGetValue(GlobalConstants.XML_DOCUMENT_CACHE_KEY, out this.XmlData);
+            bool isExist = this.memoryCache.TryGetValue(GlobalConstants.XML_DOCUMENT_CACHE_KEY, out this.xmlData);
             if (!isExist)
             {
-                this.XmlData = Encoding.Default.GetString(WebClient.DownloadData(GlobalConstants.XML_DOCUMENT_URL));
+                this.xmlData = Encoding.Default.GetString(webClient.DownloadData(GlobalConstants.XML_DOCUMENT_URL));
 
                 // TODO - Make it one day, for testing purposes - 20 seconds
                 var cacheEntryOptions = new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromSeconds(20));
 
-                this.MemoryCache.Set(GlobalConstants.XML_DOCUMENT_CACHE_KEY, this.XmlData, cacheEntryOptions);
+                this.memoryCache.Set(GlobalConstants.XML_DOCUMENT_CACHE_KEY, this.xmlData, cacheEntryOptions);
             }
         }
     }

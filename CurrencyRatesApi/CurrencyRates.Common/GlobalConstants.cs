@@ -17,5 +17,10 @@
         public const string XML_DOCUMENT_CACHE_KEY = "XmlDocument_Cache_Key";
         public const string XML_DOCUMENT_URL = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml";
 
+        /// <summary>
+        /// Constants for Euro.
+        /// </summary>
+        public const string EURO_NAME = "EUR";
+        public const decimal EURO_RATE = 1.00m;
     }
 }
