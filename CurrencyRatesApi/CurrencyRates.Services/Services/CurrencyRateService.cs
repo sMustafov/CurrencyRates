@@ -113,6 +113,11 @@ namespace CurrencyRates.Services
         /// </summary>
         private void DeserializeString()
         {
+            if (this.xmlData == null)
+            {
+                throw new Exception();   
+            }
+
             using (var stringReader = new StringReader(this.xmlData))
             {
                 this.ecbEnvelope = this.xmlSerializer.Deserialize(stringReader) as EcbEnvelope;

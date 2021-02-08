@@ -75,7 +75,7 @@ namespace CurrencyRates.WebAPI.Middlewares
 
             if (code == StatusCodes.Status500InternalServerError)
             {
-                resultMessage = JsonConvert.SerializeObject(new ErrorMessage { Message = e.Message, StatusCode = code });
+                resultMessage = JsonConvert.SerializeObject(new ErrorMessage { Message = "Internal Server Error", StatusCode = code });
             }
 
             return context.Response.WriteAsync(resultMessage);
