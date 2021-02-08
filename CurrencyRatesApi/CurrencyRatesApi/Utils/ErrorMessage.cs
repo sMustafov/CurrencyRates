@@ -1,4 +1,4 @@
-﻿namespace CurrencyRatesApi.Utils
+﻿namespace CurrencyRates.WebAPI.Utils
 {
     /// <summary>
     /// Erorr message class

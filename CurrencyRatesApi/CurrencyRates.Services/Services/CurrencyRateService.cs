@@ -6,13 +6,13 @@ using System.Xml.Serialization;
 
 using Microsoft.Extensions.Caching.Memory;
 
-using CurrencyRatesApi.Common;
-using CurrencyRatesApi.Entities.Models;
+using CurrencyRates.Common;
+using CurrencyRates.Entities.Models;
 using CurrencyRates.Entities.XmlModel;
-using CurrencyRatesApi.Interfaces;
+using CurrencyRates.Interfaces;
 using CurrencyRates.Services.Utils.Exceptions;
 
-namespace CurrencyRatesApi.Services
+namespace CurrencyRates.Services
 {
     /// <summary>
     /// Implements the ICurrencyRateService

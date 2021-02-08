@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Builder;
 
-namespace CurrencyRatesApi.Middlewares.Extensions
+namespace CurrencyRates.WebAPI.Middlewares.Extensions
 {
     public static class ErrorHandlingMiddlewareExtension
     {

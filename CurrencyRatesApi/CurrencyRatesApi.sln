@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30128.74
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CurrencyRatesApi", "CurrencyRatesApi\CurrencyRatesApi.csproj", "{0AC494B9-8F25-4050-A26E-A17675590701}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CurrencyRates.WebAPI", "CurrencyRatesApi\CurrencyRates.WebAPI.csproj", "{0AC494B9-8F25-4050-A26E-A17675590701}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CurrencyRates.Entities", "CurrencyRates.Entities\CurrencyRates.Entities.csproj", "{EFA5C978-3C6A-45B9-94B2-FD63432C07B9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CurrencyRates.Entities", "CurrencyRates.Entities\CurrencyRates.Entities.csproj", "{EFA5C978-3C6A-45B9-94B2-FD63432C07B9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CurrencyRates.Services", "CurrencyRates.Services\CurrencyRates.Services.csproj", "{DA68FDD0-DCC2-4FF1-9992-02E062989AD7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CurrencyRates.Services", "CurrencyRates.Services\CurrencyRates.Services.csproj", "{DA68FDD0-DCC2-4FF1-9992-02E062989AD7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CurrencyRates.Common", "CurrencyRates.Common\CurrencyRates.Common.csproj", "{3BDE24D9-3339-4291-9105-43B7BD220B10}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CurrencyRates.Common", "CurrencyRates.Common\CurrencyRates.Common.csproj", "{3BDE24D9-3339-4291-9105-43B7BD220B10}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

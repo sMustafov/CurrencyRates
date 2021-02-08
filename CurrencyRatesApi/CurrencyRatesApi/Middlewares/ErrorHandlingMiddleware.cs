@@ -6,10 +6,10 @@ using Microsoft.Extensions.Logging;
 
 using Newtonsoft.Json;
 
-using CurrencyRatesApi.Utils;
+using CurrencyRates.WebAPI.Utils;
 using CurrencyRates.Services.Utils.Exceptions;
 
-namespace CurrencyRatesApi.Middlewares
+namespace CurrencyRates.WebAPI.Middlewares
 {
     /// <summary>
     /// Error handling middleware class

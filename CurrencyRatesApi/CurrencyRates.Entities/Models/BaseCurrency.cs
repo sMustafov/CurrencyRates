@@ -1,4 +1,4 @@
-﻿namespace CurrencyRatesApi.Entities.Models
+﻿namespace CurrencyRates.Entities.Models
 {
     /// <summary>
     /// Base Currency class.

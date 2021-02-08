@@ -5,12 +5,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-using CurrencyRatesApi.Interfaces;
-using CurrencyRatesApi.Services;
-using CurrencyRatesApi.Middlewares.Extensions;
-using CurrencyRatesApi.Services.Utils.MemoryCacheManager;
+using CurrencyRates.WebAPI.Middlewares.Extensions;
+using CurrencyRates.Services.Utils.MemoryCacheManager;
+using CurrencyRates.Services;
+using CurrencyRates.Interfaces;
 
-namespace CurrencyRatesApi
+namespace CurrencyRates.WebAPI
 {
     public class Startup
     {
@@ -52,7 +52,7 @@ namespace CurrencyRatesApi
 
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "CurrencyRateAPI V1");
             });
 
             app.UseRouting();

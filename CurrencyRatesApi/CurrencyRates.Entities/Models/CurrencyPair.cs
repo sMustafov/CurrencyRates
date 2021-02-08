@@ -1,4 +1,4 @@
-﻿namespace CurrencyRatesApi.Entities.Models
+﻿namespace CurrencyRates.Entities.Models
 {
     /// <summary>
     /// Currency Pair class which calculates the rate between Base and Quote Currency.

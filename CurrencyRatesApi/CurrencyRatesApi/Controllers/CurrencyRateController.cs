@@ -1,12 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
-using CurrencyRatesApi.Common;
-using CurrencyRatesApi.Entities.Models;
-using CurrencyRatesApi.Interfaces;
+using CurrencyRates.Common;
+using CurrencyRates.Entities.Models;
+using CurrencyRates.Interfaces;
 using Microsoft.AspNetCore.Http;
 
-namespace CurrencyRatesApi.Controllers
+namespace CurrencyRates.WebAPI.Controllers
 {
     /// <summary>
     /// Controller class for getting currency pair

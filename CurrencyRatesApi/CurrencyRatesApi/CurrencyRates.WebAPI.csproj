@@ -2,6 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <AssemblyName>CurrencyRates.WebAPI</AssemblyName>
+    <RootNamespace>CurrencyRates.WebAPI</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,6 +1,6 @@
-﻿using CurrencyRatesApi.Entities.Models;
+﻿using CurrencyRates.Entities.Models;
 
-namespace CurrencyRatesApi.Interfaces
+namespace CurrencyRates.Interfaces
 {
     /// <summary>
     /// Interface for CurrencyRateService

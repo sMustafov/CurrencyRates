@@ -1,4 +1,4 @@
-﻿namespace CurrencyRatesApi.Common
+﻿namespace CurrencyRates.Common
 {
     /// <summary>
     /// Global constants class
