@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 
 using Newtonsoft.Json;
 
-using CurrencyRates.WebAPI.Utils;
+using CurrencyRates.Entities.ErorrModel;
 using CurrencyRates.Services.Utils.Exceptions;
 
 namespace CurrencyRates.WebAPI.Middlewares
@@ -75,7 +75,7 @@ namespace CurrencyRates.WebAPI.Middlewares
 
             if (code == StatusCodes.Status500InternalServerError)
             {
-                resultMessage = JsonConvert.SerializeObject(new ErrorMessage { Message = "Internal Server Error!", StatusCode = code });
+                resultMessage = JsonConvert.SerializeObject(new ErrorMessage { Message = e.Message, StatusCode = code });
             }
 
             return context.Response.WriteAsync(resultMessage);

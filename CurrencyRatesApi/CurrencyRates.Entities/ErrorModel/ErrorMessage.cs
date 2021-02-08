@@ -1,4 +1,4 @@
-﻿namespace CurrencyRates.WebAPI.Utils
+﻿namespace CurrencyRates.Entities.ErorrModel
 {
     /// <summary>
     /// Erorr message class
