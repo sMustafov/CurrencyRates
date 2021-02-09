@@ -5,6 +5,7 @@ using System.Text;
 using System.Xml.Serialization;
 
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Configuration;
 
 using CurrencyRates.Common;
 using CurrencyRates.Entities.Models;
@@ -28,6 +29,9 @@ namespace CurrencyRates.Services
         /// <summary> The <see cref="XmlSerializer"/>.</summary>
         private readonly XmlSerializer xmlSerializer;
 
+        /// <summary> The <see cref="IConfiguration"/>.</summary>
+        private readonly IConfiguration configuration;
+
         /// <summary> The xml data as string</summary>
         private string xmlData;
 
@@ -43,16 +47,18 @@ namespace CurrencyRates.Services
         /// <summary> The <see cref="CurrencyPair"/>.</summary>
         private CurrencyPair currencyPair;
 
+
         /// <summary>
         /// Initialize new instance of this class
         /// </summary>
         /// <param name="memoryCache">The <see cref="IMemoryCache"/>.</param>
-        public CurrencyRateService(IMemoryCache memoryCache)
+        public CurrencyRateService(IMemoryCache memoryCache, IConfiguration configuration)
         {
             this.xmlData = null;
             this.memoryCache = memoryCache;
             this.webClient = new WebClient();
             this.xmlSerializer = new XmlSerializer(typeof(EcbEnvelope));
+            this.configuration = configuration;
         }
 
         /// <summary>
@@ -72,8 +78,14 @@ namespace CurrencyRates.Services
                 throw new CustomInvalidOperationException(GlobalConstants.ERROR_CurrencyPairNotRightLength);
             }
 
-            var givenBaseCurrency = currencyPairFromUrl.Substring(0, 3);
-            var givenQuoteCurrency = currencyPairFromUrl.Substring(currencyPairFromUrl.Length - 3);
+            // Supports case insensitive
+            var currencyPairFromUrlUpperCase = currencyPairFromUrl.ToUpper();
+
+            // Gets the base currency
+            var givenBaseCurrency = currencyPairFromUrlUpperCase.Substring(0, 3);
+            
+            // Gets the quote currency
+            var givenQuoteCurrency = currencyPairFromUrlUpperCase.Substring(currencyPairFromUrlUpperCase.Length - 3);
 
             // Add to in-memory cache or get it is already there
             this.AddOrGetInMemoryCache();
@@ -96,15 +108,14 @@ namespace CurrencyRates.Services
             this.CreateBaseCurrency(givenBaseCurrency);
             this.CreateQuoteCurrency(givenQuoteCurrency);
 
-            // Calculating currency pair rate
-            // E.g. currencyPair = GBPUSD => EURUSD / EURGBP
-            var currencyPairRate = Math.Round((this.quoteCurrency.Rate / this.baseCurrency.Rate), 4, MidpointRounding.AwayFromZero);
+            // Calculating currency pair rate (e.g. currencyPair = GBPUSD => EURUSD / EURGBP)
+            var currencyPairRate = (Math.Round((this.quoteCurrency.Rate / this.baseCurrency.Rate), 4)).ToString("F4");
 
             // Creating currency pair
             this.currencyPair = new CurrencyPair
             {
                 Name = baseCurrency.Name + quoteCurrency.Name,
-                Rate = currencyPairRate
+                Rate = decimal.Parse(currencyPairRate)
             };          
         }
 
@@ -115,7 +126,7 @@ namespace CurrencyRates.Services
         {
             if (this.xmlData == null)
             {
-                throw new Exception();   
+                throw new CustomArgumentException(GlobalConstants.ERROR_NoXmlData);
             }
 
             using (var stringReader = new StringReader(this.xmlData))
@@ -182,13 +193,14 @@ namespace CurrencyRates.Services
         /// </summary>
         private void AddOrGetInMemoryCache()
         {
+            var xmlDocumentUrl = this.configuration["XmlDocument:Url"];
+
             bool isExist = this.memoryCache.TryGetValue(GlobalConstants.XML_DOCUMENT_CACHE_KEY, out this.xmlData);
             if (!isExist)
             {
-                this.xmlData = Encoding.Default.GetString(webClient.DownloadData(GlobalConstants.XML_DOCUMENT_URL));
+                this.xmlData = Encoding.Default.GetString(webClient.DownloadData(xmlDocumentUrl));
 
-                // TODO - Make it one day, for testing purposes - 20 seconds
-                var cacheEntryOptions = new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromSeconds(20));
+                var cacheEntryOptions = new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromHours(1));
 
                 this.memoryCache.Set(GlobalConstants.XML_DOCUMENT_CACHE_KEY, this.xmlData, cacheEntryOptions);
             }
